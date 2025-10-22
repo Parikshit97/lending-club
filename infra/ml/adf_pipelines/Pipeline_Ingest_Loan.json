@@ -1,0 +1,203 @@
+{
+    "name": "Pipeline_Ingest_Loan",
+    "properties": {
+        "activities": [
+            {
+                "name": "Copy_and_Rename",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "Generate timestamp",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "BlobSource",
+                        "recursive": true
+                    },
+                    "sink": {
+                        "type": "BlobSink"
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "DS_Ingest_Source",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "fileName": {
+                                "value": "@pipeline().parameters.fileName",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "DS_Ingest_Sink",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "fileName": {
+                                "value": "@concat('loan_', variables('FileTimestamp'), '.csv')",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "Delete_Original",
+                "type": "Delete",
+                "dependsOn": [
+                    {
+                        "activity": "Copy_and_Rename",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "DS_Ingest_Source",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "fileName": {
+                                "value": "@pipeline().parameters.fileName",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "logStorageSettings": {
+                        "linkedServiceName": {
+                            "referenceName": "lcingestadls",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    "enableLogging": true,
+                    "storeSettings": {
+                        "type": "AzureBlobFSReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                    }
+                }
+            },
+            {
+                "name": "Run_Pyspark_Job",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Renamed File Name",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Shared/loan_partitioning",
+                    "baseParameters": {
+                        "input_file": {
+                            "value": "@variables('RenamedFileName')",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Generate timestamp",
+                "type": "SetVariable",
+                "dependsOn": [],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "FileTimestamp",
+                    "value": {
+                        "value": "@formatDateTime(utcNow(),'yyyyMMddHHmmss')",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Renamed File Name",
+                "type": "SetVariable",
+                "dependsOn": [
+                    {
+                        "activity": "Copy_and_Rename",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "RenamedFileName",
+                    "value": {
+                        "value": "@concat('loan_', variables('FileTimestamp'), '.csv')",
+                        "type": "Expression"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "fileName": {
+                "type": "string",
+                "defaultValue": "loan.csv"
+            }
+        },
+        "variables": {
+            "RenamedFileName": {
+                "type": "String"
+            },
+            "FileTimestamp": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-10-17T08:01:07Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
