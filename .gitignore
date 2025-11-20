@@ -11,4 +11,4 @@
 
 # Actual Data Files (keeping the folders to maintain uniform structure)
 /dataset/raw/*.csv
-/dataset/processed/*.csv
+/dataset/processed/
