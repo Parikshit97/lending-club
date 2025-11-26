@@ -108,7 +108,7 @@
                 }
             },
             {
-                "name": "Run_Pyspark_Job",
+                "name": "Run ETL",
                 "type": "DatabricksNotebook",
                 "dependsOn": [
                     {
@@ -127,7 +127,7 @@
                 },
                 "userProperties": [],
                 "typeProperties": {
-                    "notebookPath": "/Shared/loan_partitioning",
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/processing",
                     "baseParameters": {
                         "input_file": {
                             "value": "@variables('RenamedFileName')",
@@ -136,7 +136,7 @@
                     }
                 },
                 "linkedServiceName": {
-                    "referenceName": "AzureDatabricks1",
+                    "referenceName": "AzureDatabricks2",
                     "type": "LinkedServiceReference"
                 }
             },
@@ -180,6 +180,114 @@
                         "type": "Expression"
                     }
                 }
+            },
+            {
+                "name": "Run Partitioning",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Run ETL",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/partitioning"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks2",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Run Financial Analysis",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Run Partitioning",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/financial_portfolio_analysis"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks2",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Run Loan Analysis",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Run Partitioning",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/loan_performance_analysis"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks2",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Run Borrower Segmentation Analysis",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Run Partitioning",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/Borrower_Segmentation_Analysis"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks3",
+                    "type": "LinkedServiceReference"
+                }
             }
         ],
         "parameters": {
@@ -197,7 +305,7 @@
             }
         },
         "annotations": [],
-        "lastPublishTime": "2025-10-17T08:01:07Z"
+        "lastPublishTime": "2025-11-26T00:16:25Z"
     },
     "type": "Microsoft.DataFactory/factories/pipelines"
 }
