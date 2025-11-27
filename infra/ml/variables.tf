@@ -1,5 +1,5 @@
 variable "location" {
-  description = "Azure region to deploy resources"
+  description = "Azure region"
   type        = string
   default     = "Canada Central"
 }

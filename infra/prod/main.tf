@@ -18,7 +18,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "prod_rg" {
   name     = "lendingclub-prod-rg"
-  location = "Canada Central"
+  location = var.location
 }
 
 resource "azurerm_storage_account" "prod_adls" {
@@ -29,4 +29,10 @@ resource "azurerm_storage_account" "prod_adls" {
   account_replication_type = "LRS"
   is_hns_enabled           = true
   min_tls_version          = "TLS1_2"
+}
+
+resource "azurerm_storage_container" "prod_container" {
+  name                  = "lcloansprod"
+  storage_account_name  = azurerm_storage_account.prod_adls.name
+  container_access_type = "private"
 }
