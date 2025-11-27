@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.dev_rg.name
+  value = azurerm_resource_group.ml_rg.name
 }
 
 output "data_factory_name" {

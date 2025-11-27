@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "adf-lendingclub"
+        },
+        "lcingestadls_accountKey": {
+            "value": ""
+        },
+        "AzureDatabricks1_accessToken": {
+            "value": ""
+        },
+        "AzureDatabricks2_accessToken": {
+            "value": ""
+        },
+        "AzureDatabricks3_accessToken": {
+            "value": ""
+        },
+        "lcingestadls_properties_typeProperties_url": {
+            "value": "https://lcingestadls.dfs.core.windows.net/"
+        },
+        "AzureDatabricks2_properties_typeProperties_existingClusterId": {
+            "value": "1125-233119-o9n3i84a"
+        },
+        "AzureDatabricks3_properties_typeProperties_existingClusterId": {
+            "value": "1125-233119-o9n3i84a"
+        },
+        "containerUri": {
+            "value": ""
+        },
+        "containerSasToken": {
+            "value": ""
+        }
+    }
+}
