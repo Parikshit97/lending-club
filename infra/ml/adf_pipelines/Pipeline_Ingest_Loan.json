@@ -288,6 +288,45 @@
                     "referenceName": "AzureDatabricks3",
                     "type": "LinkedServiceReference"
                 }
+            },
+            {
+                "name": "Run Model Training and Testing",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Run Financial Analysis",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    },
+                    {
+                        "activity": "Run Loan Analysis",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    },
+                    {
+                        "activity": "Run Borrower Segmentation Analysis",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Workspace/Users/pna42@sfu.ca/lending-club/notebooks/model_train"
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks3",
+                    "type": "LinkedServiceReference"
+                }
             }
         ],
         "parameters": {
