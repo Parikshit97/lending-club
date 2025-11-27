@@ -17,7 +17,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "stg_rg" {
   name     = "lendingclub-stg-rg"
-  location = "Canada Central"
+  location = var.location
 }
 
 resource "azurerm_storage_account" "stg_adls" {
@@ -28,4 +28,10 @@ resource "azurerm_storage_account" "stg_adls" {
   account_replication_type = "LRS"
   is_hns_enabled           = true
   min_tls_version          = "TLS1_2"
+}
+
+resource "azurerm_storage_container" "stg_container" {
+  name                  = "lcloansstg"
+  storage_account_name  = azurerm_storage_account.stg_adls.name
+  container_access_type = "private"
 }
