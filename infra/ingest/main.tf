@@ -17,7 +17,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "ingest_rg" {
   name     = "lendingclub-ingest-rg"
-  location = "Canada Central"
+  location = var.location
 }
 
 resource "azurerm_storage_account" "ingest_adls" {
@@ -28,4 +28,16 @@ resource "azurerm_storage_account" "ingest_adls" {
   account_replication_type = "LRS"
   is_hns_enabled           = true
   min_tls_version          = "TLS1_2"
+}
+
+resource "azurerm_storage_container" "ingestion_container" {
+  name                  = "ingestion"
+  storage_account_name  = azurerm_storage_account.ingest_adls.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "processed_container" {
+  name                  = "processed"
+  storage_account_name  = azurerm_storage_account.ingest_adls.name
+  container_access_type = "private"
 }
