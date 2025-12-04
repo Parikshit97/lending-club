@@ -1,1 +1,8 @@
 kagglehub
+pyspark
+pandas
+matplotlib
+seaborn
+scikit-learn
+plotly
+mlflow
