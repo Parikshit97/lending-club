@@ -3,7 +3,7 @@ This is our project for the course CMPT732: Big Data Lab 1 in which we will be d
 
 ## Details:
 
-<img width="1511" alt="image" src="https://media.github.sfu.ca/user/4929/files/4ecf1163-ceda-45b9-9973-61609495adea">
+<img width="1511" alt="image" src="https://media.github.sfu.ca/user/4929/files/4ecf1163-ceda-45b9-9973-61609495adea"> 
 
 
   
