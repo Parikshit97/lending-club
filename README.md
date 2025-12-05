@@ -3,6 +3,9 @@ This is our project for the course CMPT732: Big Data Lab 1 in which we have done
 
 **Frontend URL:** https://lending-club-lemon.vercel.app
 
+## Azure Data Factory Pipeline
+<img width="1511" alt="image" src="https://media.github.sfu.ca/user/4914/files/56db8a61-e1ad-4ba2-8856-7010f6280a5c"> 
+
 ## Repository Structure:
 ```
 lending-club/
