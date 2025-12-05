@@ -3,8 +3,7 @@ This is our project for the course CMPT732: Big Data Lab 1 in which we have done
 
 **Frontend URL:** https://lending-club-lemon.vercel.app
 
-Note: The first call to the model may face high latency or time out in rare cases due to cold start. Subsequent requests made will run with very low latency. 
-
+** Note:** _The first call to the model may face high latency or time out in rare cases due to cold start. Subsequent requests made will run with very low latency._
 
 
 https://media.github.sfu.ca/user/4929/files/8960a698-24fd-416e-b18c-80aaff67dc4c
