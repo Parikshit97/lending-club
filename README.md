@@ -3,7 +3,7 @@ This is our project for the course CMPT732: Big Data Lab 1 in which we have done
 
 **Frontend URL:** https://lending-club-lemon.vercel.app
 
-Note: The first call to the model may face high latency or time out in rare-cases due to cold start. Subsequent requests made will run with very low latency. 
+Note: The first call to the model may face high latency or time out in rare cases due to cold start. Subsequent requests made will run with very low latency. 
 
 ## Azure Data Factory Pipeline
 <img width="1511" alt="image" src="https://media.github.sfu.ca/user/4914/files/56db8a61-e1ad-4ba2-8856-7010f6280a5c"> 
