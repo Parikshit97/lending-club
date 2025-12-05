@@ -60,9 +60,8 @@ Things to Look For:
 ### Frontend
 We built a basic ReactJS frontend, using TailwindCSS and DaisyUI for a clean User Interface (UI). It was deployed using Vercel at URL: https://lending-club-lemon.vercel.app
 
-<video width="1511" controls>
-  <source src="https://media.github.sfu.ca/user/4914/files/220158f9-317a-493e-8bb4-021400144c37" type="video/mp4">
-</video>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/lFvh5tsyobM?si=poux48HhTZOjxfJL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 ### IaC using Terraform:
 We have used Terraform to ensure that our complex cloud infrastructure can easily be replicated. Moreover, using IaC serves as a documentation of our infrastructure. 
