@@ -1,0 +1,25 @@
+{
+  "source_commit": "f118c754493a46e1fe011e8b8a1759a63ce262cb",
+  "source_notebook": "notebooks/model_train.ipynb",
+  "status": "historical outputs before training-only class-weight correction; not rerun",
+  "internal_holdout": {
+    "logistic_regression": {
+      "roc_auc": 0.6926,
+      "weighted_f1": 0.6673,
+      "accuracy": 0.6205
+    },
+    "random_forest": {
+      "roc_auc": 0.6811,
+      "weighted_f1": 0.6407,
+      "accuracy": 0.5903
+    }
+  },
+  "staging": {
+    "logistic_regression": {
+      "roc_auc": 0.6935
+    },
+    "random_forest": {
+      "roc_auc": 0.6788
+    }
+  }
+}

@@ -42,12 +42,10 @@ export async function predict(formData) {
   };
 
   try {
-    console.log("api token:", import.meta.env.VITE_DATABRICKS_TOKEN);
-   const res = await fetch("/api/serving-endpoints/lc-model/invocations", {
+   const res = await fetch("/api/predict", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Basic ${import.meta.env.VITE_DATABRICKS_TOKEN}`,
         },
         body: JSON.stringify(payload),
         });

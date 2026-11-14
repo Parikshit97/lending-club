@@ -1,133 +1,57 @@
-# Lending Club 
-This is our project for the course CMPT732: Big Data Lab 1 in which we have done advanced distributed data analysis on the Lending Club dataset. Furthermore, we have also trained multiple Machine Learning models on the data, deploying the one with the best performance, and built a frontend to run live inference.
+# Lending Club Analytics and Model Serving
 
-**Frontend URL:** https://lending-club-lemon.vercel.app
+A collaborative SFU CMPT 732 project combining distributed loan-data processing, portfolio analysis, borrower segmentation, and a Spark ML classification pipeline. The inference interface connects to a separately configured Databricks serving endpoint.
 
-** Note:** _The first call to the model may face high latency or time out in rare cases due to cold start. Subsequent requests made will run with very low latency._
+## Pipeline
 
+`Raw loan records → Spark cleaning → Parquet → issue-year partitions → analysis / model training → MLflow model → server-side serving proxy → React interface`
 
-https://media.github.sfu.ca/user/4929/files/8960a698-24fd-416e-b18c-80aaff67dc4c
+| Location | Responsibility |
+|---|---|
+| `notebooks/processing.ipynb` | Data preparation |
+| `notebooks/partitioning.ipynb` | Development years 2007–2016, staging 2017, production partition 2018 |
+| `notebooks/loan_performance_analysis.ipynb` | Loan performance aggregation |
+| `notebooks/financial_portfolio_analysis.ipynb` | Portfolio-level analysis |
+| `notebooks/Borrower_Segmentation_Analysis.ipynb` | Borrower clustering and visual analysis |
+| `notebooks/model_train.ipynb` | Logistic regression and random forest training / selection |
+| `infra/` | Terraform and Azure Data Factory configuration |
+| `frontend/api/predict.js` | Server-side model invocation and input validation |
 
+Original team authorship is preserved in Git history. Data analysis and borrower-segmentation contributions can be inspected through the notebook histories.
 
+## Target and evaluation
 
+The target is a **loan-status proxy label**: `Charged Off`, `Default`, and `Late (31-120 days)` map to 1; other statuses map to 0. This does not establish a calibrated probability of eventual default. Loan maturity, label timing, feature availability, and class-specific errors need consideration before interpreting the model.
 
-## Azure Data Factory Pipeline
-<img width="1511" alt="image" src="https://media.github.sfu.ca/user/4914/files/56db8a61-e1ad-4ba2-8856-7010f6280a5c"> 
+The development partition is split 80/20 with seed 42. Preprocessing estimators are fitted through the training pipeline. Inverse-frequency class weights are now computed from the training partition only. Staging data is used for model selection, so it is not an untouched final test set.
 
-## Repository Structure:
-```
-lending-club/
-│
-├── dataset/                       # Dataset storage for local development
-│   ├── raw/                     
-│   ├── processed/           
-|    
-├── notebooks/                  # Jupyter Notebooks for ETL, Analysis, and Machine Learning
-│   ├── processing.ipynb        # ETL
-│   └── partitioning.ipynb      # Partition into the 3 categories by year
-│   └── loan_performance_analysis.ipynb      # Loan Performance Analysis
-│   └── financial_portfolio_analysis.ipynb      # Analyze Financial Ratios & Key Portfolio Metrics
-│   └── Borrower_Segmentation_Analysis.ipynb      # Clustering Borrowers
-│   └── model_train.ipynb      # Train ML Models, Select and save the one performing best on unseen data
-│
-├── frontend/                       # React Frontend Project
-│   ├── src/                        # React Components
-│   ├── vercel.json                 # Vercel Configuration for Deployment
-│
-├── infra/                     # Infrastructure as Code
-│   ├── databricks/             # Databricks Infrastructure
-│   ├── ingest/                 # Ingestion Resources
-|   ├── dev/                    # Dev Resources
-|   ├── stg/                    # Stg Resources
-|   ├── prod/                   # Prod Resources
-|   ├── ml/                     # ML Resources
-|   │   ├── adf_pipeline/       #ARM templates for ADF Pipeline
-│
-├── .databricks/                    # Azure Databricks Configuration for Git Integration
-│
-├── requirements.txt            #Requirements for local dev (not needed for our Cloud Setup)
-├── .gitignore
-└── README.md
+### Historical recorded metrics
+
+| Model | Internal holdout ROC-AUC | Support-weighted F1 | Accuracy | Staging ROC-AUC |
+|---|---:|---:|---:|---:|
+| Logistic regression | 0.6926 | 0.6673 | 0.6205 | 0.6935 |
+| Random forest | 0.6811 | 0.6407 | 0.5903 | 0.6788 |
+
+These values were copied from committed notebook outputs at revision `f118c754493a46e1fe011e8b8a1759a63ce262cb` and are retained in [results/historical-model-metrics.json](results/historical-model-metrics.json). They precede the training-only weighting correction. Stale notebook outputs have been cleared; the corrected training has **not** been rerun. New metrics require the dataset and a configured Spark environment. PR-AUC, default-class precision/recall, calibration, and final temporal-test results are not claimed here.
+
+## Local frontend checks
+
+Node.js 22 or later and npm are required.
+
+```sh
+cd frontend
+npm ci
+npm run check
 ```
 
-## Important Notes and Things to Look For:
-### Data Analysis:
-We have two Data Analysis notebooks that focus on data aggregation: loan_performance_analysis.ipynb and financial_portfolio_analysis.ipynb, with one notebook that focuses on clustering: Borrower_Segmentation_Analysis.ipynb. There is one purely ML-based notebook as well: model_train.ipynb.
+Tests exercise the serving boundary using mocked responses, including invalid input, missing configuration, upstream failures, and timeouts. The production frontend build is also checked. `npm run dev` previews the UI; serverless API calls require a Vercel development/runtime environment.
 
-Things to Look For:
-- **processing.ipynb:** Contains an ETL pipeline to clean and preprocess the data, preparing it for analysis. The processed data is stored in Parquet format (originally in CSV format) for more efficient data analysis using Spark as the columnar storage allows for optimizations like column pruning.
-- **loan_performance_analysis.ipynb:** Contains thorough data analysis on the performance of loans and how they vary with different risk classes. Please refer to the "Summary and Interpretation" markdowns and the charts and graphs, as well as the dataframe outputs for the analysis.
-- **financial_portfolio_analysis.ipynb:** This analysis focuses on the financial ratios achieved through the loans and how the loans portfolio is performing for Lending Club, including stuff like Net Cash Flow and Return on Investment (ROI). Again, there are visualizations throughout the notebook and look for the "Summary and Interpretation" markdowns for our analysis on the results.
-- **Borrower_Segmentation_Analysis.ipynb:** This notebook attempts to use clustering algorithms to segment different types of borrowers. However, in a normal dev environment (non-databricks), the visualizations from plotly in this notebook will not be visible, as they are in the video demo. This issue did not occur with the other notebooks as they used Seaborn instead of Plotly, which proved to work perfectly across the two platforms.
-- **model_train.ipynb:** This notebook uses Spark ML's implementation of the Logistic Regression and Random Forest Classifiers to predict the default flag pseudo-label given relevant columns as features. It follows the techniques we learned in class and utilizes class weights and AUC-ROC metric to overcome the class imbalance we had in our dataset. Again, the markdowns in the notebook explain the exact steps taken, and why.
+## Model-serving configuration
 
-**PS:** Our notebooks contain some commented out code sections which have been labelled to be for local development. As the final code was run on Azure, that is the one we have kept commented in, but we still left the relevant parts for locally running the project.
+The browser calls the same-origin `/api/predict` function. Only the server reads `DATABRICKS_HOST`, `DATABRICKS_TOKEN`, and `DATABRICKS_ENDPOINT`; none use the `VITE_` prefix. Copy `frontend/.env.example` for local serverless configuration and set the equivalent server environment variables for deployment. Use a least-privilege serving identity. The previous browser-exposed token should be rotated if it was used in a deployed bundle.
 
-### Frontend
-We built a basic ReactJS frontend, using TailwindCSS and DaisyUI for a clean User Interface (UI). It was deployed using Vercel at URL: https://lending-club-lemon.vercel.app
+The function accepts one row with the documented feature columns, uses a 15-second upstream timeout, and returns sanitized errors. Public deployments still need access control and rate limiting to bound paid model invocations. This update does not deploy or invoke cloud resources. See [Databricks custom-model querying](https://docs.databricks.com/aws/en/machine-learning/model-serving/score-custom-model-endpoints) for the serving request format.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/lFvh5tsyobM?si=poux48HhTZOjxfJL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+## Running data processing and training
 
-
-### IaC using Terraform:
-We have used Terraform to ensure that our complex cloud infrastructure can easily be replicated. Moreover, using IaC serves as a documentation of our infrastructure. 
-
-
-## Model Serving and Deployment:
-To deploy our model, we used the Model Serving feature in Azure Databricks. This allows the model to be saved as an "Experiment" and deployed to a live, managed endpoint. We specify the model's signature (Input/Output Schema) using MLFlow, and Azure Databricks takes care of containerizing and deploying the model pipeline.
-
-### Databricks Experiment:
-<img width="1511" alt="image" src="https://media.github.sfu.ca/user/4929/files/4ecf1163-ceda-45b9-9973-61609495adea"> 
-
-
-### Example Curl Request for Model Endpoint
-```
-curl --location 'https://adb-2231733496212994.14.azuredatabricks.net/serving-endpoints/lc-model/invocations' \
---header 'Content-Type: application/json' \
---header 'Authorization: Basic ***' \
---data '{
-    "dataframe_split": {
-        "index": [
-            0
-        ],
-        "columns": [
-            "loan_amnt",
-            "int_rate",
-            "installment",
-            "dti",
-            "inq_last_6mths",
-            "open_acc",
-            "revol_bal",
-            "revol_util",
-            "bc_util",
-            "term",
-            "grade",
-            "sub_grade",
-            "home_ownership",
-            "verification_status",
-            "purpose",
-            "addr_state"
-        ],
-        "data": [
-            [
-                10000,
-                13.5,
-                320.5,
-                18.2,
-                1,
-                10,
-                1500,
-                45.3,
-                30.0,
-                "36 months",
-                "B",
-                "B2",
-                "RENT",
-                "Verified",
-                "credit_card",
-                "CA"
-            ]
-        ]
-    }
-}'
-```
+The original notebooks target Databricks and use a provided `spark` session plus configured Azure storage paths. The raw dataset, Azure credentials, and trained model artifacts are not included. The checked-in `REDACTED` values are placeholders and must be replaced through workspace secrets, not committed credentials. `requirements.txt` lists analysis dependencies but does not reproduce a specific Databricks runtime by itself. Match the selected workspace runtime and configure the storage locations before executing the notebooks. Terraform application can create billable resources and is separate from the local checks above.
